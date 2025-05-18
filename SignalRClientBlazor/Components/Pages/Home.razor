@@ -1,0 +1,31 @@
+﻿@page "/"
+@using SignalRClientBlazor.Services
+@inject MarketHubClient HubClient
+
+<h3>📡 Market Live</h3>
+
+<p>@_message</p>
+
+@code {
+
+    private string? _message;
+
+    protected override async Task OnInitializedAsync()
+    {
+        HubClient.OnDataReceived += HandleMessage;
+        await HubClient.StartAsync();
+    }
+
+    private void HandleMessage(string msg)
+    {
+        _message = $"🔔 {msg} @ {DateTime.Now:T}";
+
+        InvokeAsync(() => StateHasChanged());
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        HubClient.OnDataReceived -= HandleMessage;
+        await HubClient.DisposeAsync();
+    }
+}
